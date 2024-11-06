@@ -1,4 +1,3 @@
-import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/utils/dbConnect";
 import User from "@/models/User";
 
