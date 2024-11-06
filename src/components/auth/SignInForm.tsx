@@ -3,6 +3,15 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+const cloudinary = require("cloudinary").v2;
+
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
 
 // Constants for OAuth
 const CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
@@ -61,34 +70,36 @@ export default function SignInForm() {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     event.preventDefault();
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const binaryStr = reader.result as string;
-        setNewUser((prevUser) => ({ ...prevUser, photo: file.name }));
-        const jsonData = {
-          email: newUser.email,
-          photo: btoa(binaryStr) // Convert binary to base64 string
-        };
-        console.log("JSON DATA: ", jsonData);
-
-
-
-            
-        try {
-          await axios.post("http://localhost:3000/api/users/add", jsonData, {
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          });
-        } catch (err) {
-          console.error(err);
-        }
-        router.push("/");
-      };
-      reader.readAsBinaryString(file);
+    var file = event.target.files?.[0];
+    let image_url;
+    // const formData = new FormData();
+    // if (file) {
+    //   formData.append('file', file);
+    // }
+    try {
+      // Upload the image
+      const result = await cloudinary.uploader.upload(base64, options);
+      // console.log(result);
+      return {status:200, data:result.secure_url};
+    } catch (error) {
+      return {status:500, data:error};
+      console.error(error);
     }
+    const jsonData = {
+      email: newUser.email,
+      photo: image_url
+    };
+    console.log("JSON DATA: ", jsonData); 
+    try {
+      await axios.post("http://localhost:3000/api/users/add", jsonData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+    } catch (err) {
+      console.error(err);
+    }
+    router.push("/");
   };
 
   return (

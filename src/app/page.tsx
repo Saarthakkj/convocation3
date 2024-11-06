@@ -4,11 +4,12 @@ import { useRouter } from "next/navigation";
 
 export  default function Home() {
   const router = useRouter();
-
-  let images  = fetch("http://localhost:3000/api/users/images")
-  .then(res => res.json().then())
-  ;
-  console.log("images json : " , images);
+  let images = fetch("http://localhost:3000/api/users/images")
+    .then(res => res.json())
+    .then(data => {
+      console.log("images json: ", data);
+      return data;
+    });
   // console.log(images);
 //   const PhotoComponent = props => (
 //     props.photo ? <Card.Img
@@ -18,13 +19,13 @@ export  default function Home() {
 // );
 
   
-  function ImageGallery({ images }: { images: typeof  JSON[] }) {
+  function ImageGallery({ data }: { data: typeof  JSON[] }) {
     return (
       <div>
-        {images.map((image, index) => 
+        {data?.map((index, photo) => 
           <div key={index}>
             <Image
-              src={`data:image/jpeg;base64,${image.photo}`}
+              src={`data:image/jpeg;base64,${photo}`}
               alt={`User ${index}`}
               width={100}
               height={100}

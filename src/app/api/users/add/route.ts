@@ -1,5 +1,7 @@
 import dbConnect from "@/utils/dbConnect";
 import User from "@/models/User";
+import { v2 as cloudinary } from 'cloudinary';
+
 
 let count = 0;
 
@@ -10,6 +12,9 @@ export async function POST(req: Request, res: Response) {
   console.log("req.body : ", body);
 
   try {
+    //   const result = await cloudinary.uploader.upload(req.file.path , {
+    //     folder:'folder_name'
+    // });
     const { email, photo } = body ;
 
     console.log("email at backend : ", email, "photo at backend : ", photo);
