@@ -1,6 +1,5 @@
 import dbConnect from "@/utils/dbConnect";
 import User from "@/models/User";
-import { v2 as cloudinary } from 'cloudinary';
 
 
 let count = 0;
@@ -12,12 +11,11 @@ export async function POST(req: Request, res: Response) {
   console.log("req.body : ", body);
 
   try {
-    //   const result = await cloudinary.uploader.upload(req.file.path , {
-    //     folder:'folder_name'
-    // });
-    const { email, photo } = body ;
 
-    console.log("email at backend : ", email, "photo at backend : ", photo);
+    const { email, photo } = body;
+
+    console.log("email at backend : ", email, "photo url at backend : ", photo);
+   
 
     const newUser = new User({
       email,
@@ -35,7 +33,7 @@ export async function POST(req: Request, res: Response) {
   } catch (error) {
     console.error("Error adding user:", error);
     return Response.json({
-      message: "User not added successfully", 
+      message: "User not added successfully",
     });
   }
 }

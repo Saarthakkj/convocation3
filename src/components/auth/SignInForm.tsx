@@ -3,13 +3,19 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-const cloudinary = require("cloudinary").v2;
+// import {v2 as cloudinary} from "cloudinary";
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+
+const saveImageonCloudinary = async (base64String: string) => {
+  try {
+    const response = await axios.post('/api/upload', { base64: base64String });
+    const result = response.data;
+    return result;
+  } catch (error) {
+    console.error("Error uploading image:", error);
+  }
+};
+
 
 // Constants for OAuth
 const CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
@@ -37,6 +43,15 @@ export default function SignInForm() {
     );
     return JSON.parse(jsonPayload);
   };
+
+  function imagetobse64(file: File) : string {
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64String = reader.result as string;
+      return base64String;
+    };
+    return "";
+  }
 
   useEffect(() => {
     const script = document.createElement("script");
@@ -77,29 +92,35 @@ export default function SignInForm() {
   ) => {
     event.preventDefault();
     var file = event.target.files?.[0];
-    var base64 = image2base64(file);
+    if(!file){
+      return {status:500, data:"No file selected"};
+    }
+    const base64String = imagetobse64(file);
+    var  result ;
+
     try {
       // Upload the image
-      const result = await cloudinary.uploader.upload(base64, Option);
-      const jsonData = {
-        email: newUser.email,
-        photo: result.secure_url,
-      };
-      console.log("JSON DATA: ", jsonData);
-      try {
-        await axios.post("http://localhost:3000/api/users/add", jsonData, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-      } catch (err) {
-        console.error(err);
-      }
+      result = await saveImageonCloudinary(base64String);
+      console.log(result);
+      // return { status: 200, data: result.data };
     } catch (error) {
       return { status: 500, data: error };
+      console.error(error);
     }
-    
-    
+    const jsonData = {
+      email: newUser.email,
+      photo: result.data,
+    };
+    console.log("JSON DATA: ", jsonData);
+    try {
+      await axios.post("http://localhost:3000/api/users/add", jsonData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    } catch (err) {
+      console.error(err);
+    }
     router.push("/");
   };
 

@@ -1,8 +1,15 @@
 "use client";
 import Image from "next/image";
+"use client"
 import { useRouter } from "next/navigation";
+import ImageGallery from '../components/ImageGallery';
+import { getStaticPaths, getStaticProps } from '../pages/paths';
+
+
+const YOUR_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME;
 
 export default function Home() {
+export default function Home({ image }: { image: any }) {
   const router = useRouter();
   let images = fetch("http://localhost:3000/api/users/images")
     .then((res) => res.json())
@@ -37,6 +44,9 @@ export default function Home() {
         Sign In
       </button>
       <ImageGallery />
+      <h1>IHello World</h1>
+      <ImageGallery data={[image]} />
+      <button onClick={() => router.push('/signin')}>Upload</button>
     </div>
   );
 }
