@@ -45,7 +45,8 @@ export default function Home({ image }: { image: any }) {
       </button>
       <ImageGallery />
       <h1>IHello World</h1>
-      <ImageGallery data={[image]} />
+      <ImageGallery />
+      {/* <ImageGallery data={[image]} /> */}
       <button onClick={() => router.push('/signin')}>Upload</button>
     </div>
   );
