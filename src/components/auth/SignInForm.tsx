@@ -5,13 +5,11 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 const cloudinary = require("cloudinary").v2;
 
-
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
-
 
 // Constants for OAuth
 const CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
@@ -66,39 +64,42 @@ export default function SignInForm() {
     };
   }, []);
 
+  function image2base64(file: any) {
+    var reader = new FileReader();
+    reader.onloadend = function () {
+      console.log("Encoded Base 64 File String:", reader.result);
+    };
+    return reader.result;
+  }
+
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     event.preventDefault();
     var file = event.target.files?.[0];
-    let image_url;
-    // const formData = new FormData();
-    // if (file) {
-    //   formData.append('file', file);
-    // }
+    var base64 = image2base64(file);
     try {
       // Upload the image
-      const result = await cloudinary.uploader.upload(base64, options);
-      // console.log(result);
-      return {status:200, data:result.secure_url};
+      const result = await cloudinary.uploader.upload(base64, Option);
+      const jsonData = {
+        email: newUser.email,
+        photo: result.secure_url,
+      };
+      console.log("JSON DATA: ", jsonData);
+      try {
+        await axios.post("http://localhost:3000/api/users/add", jsonData, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+      } catch (err) {
+        console.error(err);
+      }
     } catch (error) {
-      return {status:500, data:error};
-      console.error(error);
+      return { status: 500, data: error };
     }
-    const jsonData = {
-      email: newUser.email,
-      photo: image_url
-    };
-    console.log("JSON DATA: ", jsonData); 
-    try {
-      await axios.post("http://localhost:3000/api/users/add", jsonData, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-    } catch (err) {
-      console.error(err);
-    }
+    
+    
     router.push("/");
   };
 

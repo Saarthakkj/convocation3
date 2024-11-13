@@ -1,41 +1,31 @@
-"use client"
+"use client";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-export  default function Home() {
+export default function Home() {
   const router = useRouter();
   let images = fetch("http://localhost:3000/api/users/images")
-    .then(res => res.json())
-    .then(data => {
+    .then((res) => res.json())
+    .then((data) => {
       console.log("images json: ", data);
       return data;
     });
   // console.log(images);
-//   const PhotoComponent = props => (
-//     props.photo ? <Card.Img
-//       src={`data:image/png;base64,${props.photo}`}
-//       alt={'photo'}
-//     /> : ''
-// );
+  //   const PhotoComponent = props => (
+  //     props.photo ? <Card.Img
+  //       src={`data:image/png;base64,${props.photo}`}
+  //       alt={'photo'}
+  //     /> : ''
+  // );
 
-  
-  function ImageGallery({ data }: { data: typeof  JSON[] }) {
+  // function ImageGallery({ data }: { data: (typeof JSON)[] }) {
+  function ImageGallery() {
     return (
       <div>
-        {data?.map((index, photo) => 
-          <div key={index}>
-            <Image
-              src={`data:image/jpeg;base64,${photo}`}
-              alt={`User ${index}`}
-              width={100}
-              height={100}
-            />
-          </div>
-        )}
+        Hello World!
       </div>
     );
   }
-
 
   return (
     <div>
@@ -46,9 +36,7 @@ export  default function Home() {
       >
         Sign In
       </button>
-      <ImageGallery images={images} />
-      
+      <ImageGallery />
     </div>
   );
 }
-
