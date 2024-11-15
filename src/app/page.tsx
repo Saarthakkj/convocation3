@@ -1,53 +1,43 @@
-"use client";
-import Image from "next/image";
 "use client"
 import { useRouter } from "next/navigation";
-import ImageGallery from '../components/ImageGallery';
-import { getStaticPaths, getStaticProps } from '../pages/paths';
-
-
-const YOUR_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME;
+import { useState, useEffect } from 'react';
 
 export default function Home() {
-export default function Home({ image }: { image: any }) {
   const router = useRouter();
-  let images = fetch("http://localhost:3000/api/users/images")
-    .then((res) => res.json())
-    .then((data) => {
-      console.log("images json: ", data);
-      return data;
-    });
-  // console.log(images);
-  //   const PhotoComponent = props => (
-  //     props.photo ? <Card.Img
-  //       src={`data:image/png;base64,${props.photo}`}
-  //       alt={'photo'}
-  //     /> : ''
-  // );
+  const [images_json, setimages_json] = useState<json_type[]>([]);
+  const [images_grid, setimages_grid] = useState<string[]>([]);
 
-  // function ImageGallery({ data }: { data: (typeof JSON)[] }) {
-  function ImageGallery() {
+  useEffect(() => {
+    fetch("http://localhost:3000/api/users/images")
+      .then((res) => res.json())
+      .then((data) => {
+        setimages_json(data);
+        const grid = data.map((item: json_type) => 'data:image/png;base64,' + item.photo);
+        setimages_grid(grid);
+      });
+  }, []);
+
+  function ImageGallery({ data_json }: { data_json: string[] }) {
     return (
-      <div>
-        Hello World!
+      <div className = " grid grid-cols-10">
+        {data_json.map((image, index) => (
+          <img className = "h-full w-full" src = {image} alt="pfp image" key = {index}/>
+        ))}
       </div>
     );
   }
 
   return (
     <div>
-      <h1>hello world</h1>
-      <button
-        onClick={() => router.push("/signin")}
-        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-      >
-        Sign In
-      </button>
-      <ImageGallery />
-      <h1>IHello World</h1>
-      <ImageGallery />
-      {/* <ImageGallery data={[image]} /> */}
-      <button onClick={() => router.push('/signin')}>Upload</button>
+      <ImageGallery data_json={images_grid} />
+      <div className="absolute bottom-0 right-0 m-4">
+        <button
+          onClick={() => router.push("/signin")}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Sign In
+        </button>
+      </div>
     </div>
   );
 }

@@ -5,17 +5,15 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 // import {v2 as cloudinary} from "cloudinary";
 
-
 const saveImageonCloudinary = async (base64String: string) => {
   try {
-    const response = await axios.post('/api/upload', { base64: base64String });
+    const response = await axios.post("/api/upload", { base64: base64String });
     const result = response.data;
     return result;
   } catch (error) {
     console.error("Error uploading image:", error);
   }
 };
-
 
 // Constants for OAuth
 const CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
@@ -29,9 +27,10 @@ declare global {
 
 export default function SignInForm() {
   const router = useRouter();
-  const [newUser, setNewUser] = useState({ email: "", photo: "" });
+  const [newEmail, setnewEmail] = useState("");
   const [errorMessageVisible, setErrorMessageVisible] = useState(false);
   const [uploadPhotoVisible, setUploadPhotoVisible] = useState(false);
+
   const decodeJwtResponse = (token: string) => {
     const base64Url = token.split(".")[1];
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
@@ -44,14 +43,7 @@ export default function SignInForm() {
     return JSON.parse(jsonPayload);
   };
 
-  function imagetobse64(file: File) : string {
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      const base64String = reader.result as string;
-      return base64String;
-    };
-    return "";
-  }
+
 
   useEffect(() => {
     const script = document.createElement("script");
@@ -68,7 +60,7 @@ export default function SignInForm() {
       for (let i = 0; i < email.length; i++) {
         if (email[i] === "2" && email[i + 1] === "2") {
           setUploadPhotoVisible(true);
-          setNewUser((prevUser) => ({ ...prevUser, email: email }));
+          setnewEmail((prevEmail) => email);
           found = true;
           break;
         }
@@ -79,49 +71,40 @@ export default function SignInForm() {
     };
   }, []);
 
-  function image2base64(file: any) {
-    var reader = new FileReader();
-    reader.onloadend = function () {
-      console.log("Encoded Base 64 File String:", reader.result);
-    };
-    return reader.result;
-  }
-
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     event.preventDefault();
     var file = event.target.files?.[0];
-    if(!file){
-      return {status:500, data:"No file selected"};
+    if (!file) {
+      return { status: 500, data: "No file selected" };
     }
-    const base64String = imagetobse64(file);
-    var  result ;
-
-    try {
-      // Upload the image
-      result = await saveImageonCloudinary(base64String);
-      console.log(result);
-      // return { status: 200, data: result.data };
-    } catch (error) {
-      return { status: 500, data: error };
-      console.error(error);
+    
+    var binaryStr = "";
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const binaryStr = reader.result as string;
+        // setNewUser((prevUser) => ({ ...prevUser, photo: file.name }));
+        const jsonData = {
+          email: newEmail,
+          photo: btoa(binaryStr) // Convert binary to base64 string
+        };
+        console.log("JSON DATA: ", jsonData);
+          
+        try {
+          await axios.post("http://localhost:3000/api/users/add", jsonData, {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+        } catch (err) {
+          console.error(err);
+        }
+        router.push("/");
+      };
+      reader.readAsBinaryString(file);
     }
-    const jsonData = {
-      email: newUser.email,
-      photo: result.data,
-    };
-    console.log("JSON DATA: ", jsonData);
-    try {
-      await axios.post("http://localhost:3000/api/users/add", jsonData, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-    } catch (err) {
-      console.error(err);
-    }
-    router.push("/");
   };
 
   return (

@@ -8,13 +8,13 @@ export async function POST(req: Request, res: Response) {
   await dbConnect();
   console.log("count at backend : ", count);
   const body = await req.json();
-  console.log("req.body : ", body);
+  // console.log("req.body : ", body);
 
   try {
 
     const { email, photo } = body;
 
-    console.log("email at backend : ", email, "photo url at backend : ", photo);
+    // console.log("email at backend : ", email, "photo url at backend : ", photo);
    
 
     const newUser = new User({
